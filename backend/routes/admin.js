@@ -9,20 +9,27 @@ const router = express.Router();
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
+    console.log('🔐 Login attempt for username:', username);
 
     // Find admin user
     const result = await db.query('SELECT * FROM admins WHERE username = $1', [username]);
     
     if (result.rows.length === 0) {
+      console.log('❌ User not found:', username);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const admin = result.rows[0];
+    console.log('👤 Found user:', { id: admin.id, username: admin.username });
+    console.log('🔑 Stored hash:', admin.password_hash);
+    console.log('🔓 Provided password:', password);
 
     // Check password
     const isValidPassword = await bcrypt.compare(password, admin.password_hash);
+    console.log('✅ Password valid:', isValidPassword);
     
     if (!isValidPassword) {
+      console.log('❌ Invalid password for user:', username);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -32,6 +39,8 @@ router.post('/login', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
+
+    console.log('🎫 Generated token for user:', username);
 
     res.json({
       success: true,
@@ -44,7 +53,7 @@ router.post('/login', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('💥 Login error:', error);
     res.status(500).json({ error: 'Login failed' });
   }
 });

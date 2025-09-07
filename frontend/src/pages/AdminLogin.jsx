@@ -15,13 +15,25 @@ const AdminLogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('🔍 Form submitted with credentials:', credentials);
+    
     setLoading(true);
     setError('');
 
-    const result = await login(credentials);
-    
-    if (!result.success) {
-      setError(result.error);
+    try {
+      console.log('🚀 Attempting login...');
+      const result = await login(credentials);
+      console.log('📝 Login result:', result);
+      
+      if (!result.success) {
+        console.error('❌ Login failed:', result.error);
+        setError(result.error);
+      } else {
+        console.log('✅ Login successful!');
+      }
+    } catch (error) {
+      console.error('💥 Login error:', error);
+      setError('Login failed: ' + error.message);
     }
     
     setLoading(false);
